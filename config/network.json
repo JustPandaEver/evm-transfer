@@ -1,0 +1,18 @@
+{
+  "Sepolia": {
+    "RPC_URL": "https://1rpc.io/sepolia",
+    "CHAIN_ID": "11155111"
+  },
+  "Units Testnet": {
+    "RPC_URL": "https://rpc-testnet.unit0.dev",
+    "CHAIN_ID": "88817"
+  },
+  "Axonum Testnet": {
+    "RPC_URL": "https://sepolia.axonum.io/",
+    "CHAIN_ID": "1635282798"
+  },
+  "Galadriel Devnet": {
+    "RPC_URL": "https://devnet.galadriel.com/",
+    "CHAIN_ID": "696969"
+  }
+}
