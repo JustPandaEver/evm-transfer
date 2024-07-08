@@ -14,5 +14,17 @@
   "Galadriel Devnet": {
     "RPC_URL": "https://devnet.galadriel.com/",
     "CHAIN_ID": "696969"
+  },
+  "Plume Testnet": {
+    "RPC_URL": "https://testnet-rpc.plumenetwork.xyz/http",
+    "CHAIN_ID": "161221135"
+  },
+  "Kakarot zkEVM Testnet": {
+    "RPC_URL": "https://sepolia-rpc.kakarot.org",
+    "CHAIN_ID": "1802203764"
+  },
+  "Zero Testnet": {
+    "RPC_URL": "https://rpc.zerion.io/v1/zero-sepolia",
+    "CHAIN_ID": "4457845"
   }
 }
