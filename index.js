@@ -28,7 +28,7 @@ function displayNetworks() {
     });
 }
 
-// Function to prompt user for network selection
+// Function to prompt user for input
 function promptUser(question) {
     return new Promise((resolve) => {
         const rl = readline.createInterface({
@@ -43,8 +43,33 @@ function promptUser(question) {
     });
 }
 
+// Function to add a new network
+async function addNetwork() {
+    const name = await promptUser('Enter Network Name, exp Zero Testnet: ');
+    const rpcUrl = await promptUser('Enter RPC URL, https: ');
+    const chainId = await promptUser('Enter Chain ID: ');
+
+    if (networkConfig[name]) {
+        throw new Error(`Network with name ${name} already exists`);
+    }
+
+    networkConfig[name] = {
+        RPC_URL: rpcUrl,
+        CHAIN_ID: chainId
+    };
+
+    fs.writeFileSync('./config/network.json', JSON.stringify(networkConfig, null, 2));
+    console.log(chalk.greenBright('Network added successfully!'));
+}
+
 async function main() {
     printName();
+
+    const action = await promptUser('Do you want to add a new network? (y/n): ');
+
+    if (action.toLowerCase() === 'y') {
+        await addNetwork();
+    }
 
     // Display and select network
     displayNetworks();
@@ -63,7 +88,6 @@ async function main() {
     const provider = new ethers.JsonRpcProvider(RPC_URL);
     const wallet = new ethers.Wallet(privateKey, provider, CHAIN_ID);
 
-    const nonceManager = new ethers.NonceManager(wallet);
     // Function to wait for a specified number of milliseconds
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -89,9 +113,16 @@ async function main() {
 
     const randomAddresses = generateMultipleRandomAddresses(addressCount);
     log('INFO', 'Starting ETH transfers...');
-    await delay(2000);
+    await delay(1000);
 
-    const amountInEther = '0.00000001'; // Amount to send in ETH
+    // Function to generate a random amount of Ether
+    function generateRandomAmount() {
+        const amounts = Math.floor(Math.random() * 11) + 10; // Generates a random number between 10 and 20
+        return ethers.parseUnits("0.0000000000000000" + amounts, 'ether'); // Convert to wei
+    }
+
+    // Get the initial nonce
+    let nonce = await provider.getTransactionCount(wallet.address);
 
     // Function to send transactions with retries
     async function sendTransactions() {
@@ -103,22 +134,27 @@ async function main() {
 
             while (retryCount < maxRetries) {
                 try {
-                    const gas = await provider.getFeeData();
-                    let gasPrice = gas.gasPrice?.toString();
-                    if (gasPrice) {
-                        gasPrice = ethers.parseUnits((parseFloat(gasPrice) * 2).toString(), "wei").toString();
-                    }
-
+                    // Create the transaction
                     const tx = {
                         to: recipient,
-                        value: ethers.parseEther(amountInEther),
-                        gasLimit: 21000,
-                        gasPrice: gasPrice,
+                        value: generateRandomAmount(),
+                        nonce: nonce // Use the current nonce
                     };
 
-                    await nonceManager.sendTransaction(tx);
+                    // Estimate gas limit
+                    const gasLimit = await wallet.estimateGas(tx);
+                    tx.gasLimit = gasLimit;
+
+                    // Get gas price
+                    const gasData = await provider.getFeeData();
+                    tx.gasPrice = gasData.gasPrice;
+
+                    // Send the transaction
+                    const txResponse = await wallet.sendTransaction(tx);
+
                     successCount++;
-                    log('SUCCESS', `Transaction ${successCount} sent to ${recipient}`);
+                    log('SUCCESS', `Transaction ${successCount} with hash: ${txResponse.hash}`);
+                    nonce++; // Increment nonce for the next transaction
                     break; // Exit retry loop on success
                 } catch (error) {
                     retryCount++;
@@ -130,7 +166,7 @@ async function main() {
                         errorMessage = 'Service Temporarily Unavailable';
                     }
                     log('ERROR', `Error sending transaction to ${recipient}: ${errorMessage}`);
-                    await delay(1000); // Wait before retrying
+                    await delay(500); // Wait before retrying
                 }
             }
 
