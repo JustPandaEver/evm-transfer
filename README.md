@@ -37,3 +37,6 @@ PRIVATE_KEY="your_private_key"
 ```
 npm start
 ```
+
+### Donate
+EVM = 0x000000DE3b4CD31742711440C1283b162035E00E
