@@ -120,13 +120,9 @@ async function main() {
         const amounts = Math.floor(Math.random() * 11) + 10; // Generates a random number between 10 and 20
         return ethers.parseUnits("0.0000000000000000" + amounts, 'ether'); // Convert to wei
     }
-
-    // Get the initial nonce
-    let nonce = await provider.getTransactionCount(wallet.address);
-
     // Function to send transactions with retries
     async function sendTransactions() {
-        let successCount = 0; // Counter for successful transactions
+        let successCount = 0;
 
         for (const recipient of randomAddresses) {
             let retryCount = 0;
@@ -140,7 +136,7 @@ async function main() {
                         gasPrice: await provider.getFeeData(),
                         gasLimit: 22000,
                         value: generateRandomAmount(),
-                        nonce: nonce // Use the current nonce
+                        nonce: await provider.getTransactionCount(wallet.address)
                     };
 
                     // Send the transaction
