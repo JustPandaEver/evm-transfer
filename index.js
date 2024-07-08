@@ -137,17 +137,11 @@ async function main() {
                     // Create the transaction
                     const tx = {
                         to: recipient,
+                        gasPrice: await provider.getFeeData(),
+                        gasLimit: 22000,
                         value: generateRandomAmount(),
                         nonce: nonce // Use the current nonce
                     };
-
-                    // Estimate gas limit
-                    const gasLimit = await wallet.estimateGas(tx);
-                    tx.gasLimit = gasLimit;
-
-                    // Get gas price
-                    const gasData = await provider.getFeeData();
-                    tx.gasPrice = gasData.gasPrice;
 
                     // Send the transaction
                     const txResponse = await wallet.sendTransaction(tx);
